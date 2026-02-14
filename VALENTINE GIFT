@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Galaxia Cinematográfica</title>
+<style>
+body{
+margin:0;
+overflow:hidden;
+background:black;
+}
+canvas{display:block;}
+</style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+
+const scene=new THREE.Scene();
+
+const loader=new THREE.TextureLoader();
+loader.load("https://threejs.org/examples/textures/space.jpg",tex=>{
+scene.background=tex;
+});
+
+const camera=new THREE.PerspectiveCamera(
+70,
+window.innerWidth/window.innerHeight,
+0.1,
+8000
+);
+camera.position.set(0,300,900);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// 🎬 fade
+const fade=document.createElement("div");
+fade.style.position="fixed";
+fade.style.top=0;
+fade.style.left=0;
+fade.style.width="100%";
+fade.style.height="100%";
+fade.style.background="black";
+fade.style.pointerEvents="none";
+fade.style.transition="opacity 4s ease";
+document.body.appendChild(fade);
+setTimeout(()=>fade.style.opacity=0,300);
+
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;
+controls.enablePan=true;
+controls.panSpeed=1.2;
+controls.zoomSpeed=1.2;
+controls.minDistance=80;
+controls.maxDistance=3000;
+
+// 🎵 música
+const audio=new Audio(" ");
+audio.loop=true;
+audio.volume=0.4;
+window.addEventListener("click",()=>audio.play(),{once:true});
+
+// ⭐ estrellas
+const starGeo=new THREE.BufferGeometry();
+const starVerts=[];
+for(let i=0;i<20000;i++){
+starVerts.push(
+THREE.MathUtils.randFloatSpread(6000),
+THREE.MathUtils.randFloatSpread(6000),
+THREE.MathUtils.randFloatSpread(6000)
+);
+}
+starGeo.setAttribute('position',
+new THREE.Float32BufferAttribute(starVerts,3));
+
+const starMat=new THREE.PointsMaterial({
+color:0xffffff,
+size:1,
+transparent:true,
+opacity:0.35
+});
+
+const stars=new THREE.Points(starGeo,starMat);
+scene.add(stars);
+
+// 🕳️ agujero negro
+const hole=new THREE.Mesh(
+new THREE.SphereGeometry(60,64,64),
+new THREE.MeshBasicMaterial({color:0x000000})
+);
+scene.add(hole);
+
+const glow=new THREE.Mesh(
+new THREE.SphereGeometry(100,64,64),
+new THREE.MeshBasicMaterial({
+color:0xaa00ff,
+transparent:true,
+opacity:0.35
+})
+);
+scene.add(glow);
+
+// 🌌 lente
+const lens=new THREE.Mesh(
+new THREE.RingGeometry(90,180,64),
+new THREE.MeshBasicMaterial({
+color:0xff00ff,
+transparent:true,
+opacity:0.25,
+side:THREE.DoubleSide
+})
+);
+lens.rotation.x=Math.PI/2;
+scene.add(lens);
+
+// 💜 disco
+const diskGeometry=new THREE.RingGeometry(120,200,128);
+const diskMaterial=new THREE.MeshBasicMaterial({
+color:0xff00ff,
+transparent:true,
+opacity:0.35,
+side:THREE.DoubleSide
+});
+const accretionDisk=new THREE.Mesh(diskGeometry,diskMaterial);
+accretionDisk.rotation.x=Math.PI/2;
+scene.add(accretionDisk);
+
+// ✨ texto
+function textSprite(msg){
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+canvas.width=1024;
+canvas.height=256;
+
+ctx.font="48px Arial";
+ctx.textAlign="center";
+ctx.fillStyle="#ff77ff";
+ctx.shadowColor="#ff00ff";
+ctx.shadowBlur=20;
+ctx.fillText(msg,512,128);
+
+const tex=new THREE.CanvasTexture(canvas);
+const mat=new THREE.SpriteMaterial({map:tex,transparent:true,opacity:0.8});
+const sprite=new THREE.Sprite(mat);
+sprite.scale.set(160,60,1);
+return sprite;
+}
+
+// 👉 TUS FRASES COMPLETAS — intactas
+const phrases=[
+
+"Te amo ❤️","Mi vida 💖","Siempre contigo 🤍","Eres todo ✨","Mi hogar 🏡",
+"Amor eterno 💞","Solo tú 💘","Mi alegría 😊","Contigo siempre 🌙","Mi cielo ☁️",
+"Te adoro 🥰","Mi paz 🕊️","Eres magia ✨","Amor mío 💓","Mi reina 👑",
+"Besos infinitos 😘","Mi sol ☀️","Eres luz 💫","Dulce amor 🍯","Mi sueño 🌙",
+"Amor bonito 🌸","Eres perfecta 💎","Mi corazón ❤️‍🔥","Te pienso 💭","Siempre tú 💗",
+"Amor sincero 🤍","Mi razón 🌹","Eres especial ⭐","Te elijo 💍","Amor puro 🤍",
+"Mi refugio 🫂","Te extraño 💌","Amor infinito ♾️","Mi todo 💖","Eres única 🌷",
+"Te quiero 💕","Mi princesa 👸","Amor real 💞","Contigo mejor 🌈","Mi tesoro 💰",
+"Eres increíble 🌟","Amor dulce 🍬","Mi encanto ✨","Siempre juntos 🤝","Te necesito 💘",
+"Amor fiel 🐾","Mi mundo 🌍","Eres hermosa 🌹","Amor lindo 💗","Mi fortuna 🍀",
+"Eres calma 🌿","Amor eterno 💫","Mi ilusión 🎈","Te abrazo 🤗","Amor profundo 🌊",
+"Mi sonrisa 😊","Eres todo 💖","Amor sincero 💌","Mi destino 🧭","Te cuido 🫶",
+"Amor bonito 🌺","Mi inspiración 🎨","Eres perfecta 💝","Amor tierno 🧸","Mi felicidad 😄",
+"Siempre amor 💓","Te valoro 🌼","Amor verdadero 🤍","Mi estrella ⭐","Eres paz 🕊️",
+"Amor seguro 🛡️","Mi compañía 🤍","Te admiro 👀","Amor eterno ❤️","Mi latido 💓",
+"Eres sueño 🌙","Amor bonito 💞","Mi calma 🌿","Te amo 💘","Amor mágico ✨",
+"Mi persona 🤍","Eres razón 🌹","Amor fuerte 💪","Mi orgullo 🌟","Te elijo 💍",
+"Amor suave 🌸","Mi cariño 💗","Eres todo 💖","Amor infinito ♾️","Mi abrigo 🧥",
+"Te adoro 😘","Amor fiel 🤍","Mi alegría 😊","Eres amor ❤️","Amor puro 💞",
+"Mi siempre ♾️"
+
+];
+
+const orbiters=[];
+
+phrases.forEach(text=>{
+const sprite=textSprite(text);
+const radius=300+Math.random()*200;
+const angle=Math.random()*Math.PI*2;
+const speed=0.0005+Math.random()*0.0007;
+const height=(Math.random()-0.5)*120;
+orbiters.push({sprite,radius,angle,speed,height});
+scene.add(sprite);
+});
+
+// 🌠 fugaces
+const shootingStars=[];
+function spawnShootingStar(){
+const geo=new THREE.SphereGeometry(2,8,8);
+const mat=new THREE.MeshBasicMaterial({color:0xffffff});
+const star=new THREE.Mesh(geo,mat);
+star.position.set(
+THREE.MathUtils.randFloatSpread(3000),
+THREE.MathUtils.randFloatSpread(2000),
+-2000
+);
+star.velocity=new THREE.Vector3(0,0,20);
+scene.add(star);
+shootingStars.push(star);
+setTimeout(()=>scene.remove(star),2000);
+}
+setInterval(spawnShootingStar,6000);
+
+function animate(){
+requestAnimationFrame(animate);
+
+orbiters.forEach(o=>{
+o.angle+=o.speed;
+o.sprite.position.set(
+Math.cos(o.angle)*o.radius,
+o.height,
+Math.sin(o.angle)*o.radius
+);
+
+const dist=camera.position.distanceTo(o.sprite.position);
+const glowFactor=Math.max(0,1-dist/800);
+o.sprite.material.opacity=0.6+glowFactor*0.8;
+o.sprite.scale.set(160+glowFactor*60,60+glowFactor*20,1);
+});
+
+accretionDisk.rotation.z+=0.002;
+lens.rotation.z+=0.001;
+
+const scale=1+Math.sin(Date.now()*0.002)*0.05;
+glow.scale.set(scale,scale,scale);
+
+shootingStars.forEach(s=>{
+s.position.add(s.velocity);
+});
+
+controls.update();
+renderer.render(scene,camera);
+}
+
+animate();
+
+window.addEventListener('resize',()=>{
+camera.aspect=window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+</script>
+</body>
+</html>
